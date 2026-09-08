@@ -1,1 +1,0 @@
-/usr/bin/c++ -Wl,--dependency-file=CMakeFiles/raytrace.dir/link.d "CMakeFiles/raytrace.dir/ppm-image.cpp.o" -o raytrace

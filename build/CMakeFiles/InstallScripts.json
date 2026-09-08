@@ -1,7 +1,0 @@
-{
-	"InstallScripts" : 
-	[
-		"/home/songoku/ray-tracing/build/cmake_install.cmake"
-	],
-	"Parallel" : false
-}
