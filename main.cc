@@ -17,6 +17,7 @@ int main(){
 	*/
 
 	for(int j = 0; j < image_height; j++){
+		std::clog << "\rScanlines remaining: " <<(image_height - j) <<  ' ' << std:: flush;
 		for(int i  = 0;i < image_width;i++){
 			auto r = double(i) / (image_width-1);//basically goes slowly from 0 to 1 (it acts like percent - 0 to 100)(i am very proud of this, i figured it out on my own after looking at the image)
 			auto g = double(j) / (image_height-1);
