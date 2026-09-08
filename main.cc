@@ -19,8 +19,8 @@ int main(){
 	for(int j = 0; j < image_height; j++){
 		for(int i  = 0;i < image_width;i++){
 			auto r = double(i) / (image_width-1);//basically goes slowly from 0 to 1 (it acts like percent - 0 to 100)(i am very proud of this, i figured it out on my own after looking at the image)
-			auto b = double(j) / (image_height-1);
-			auto g = 0.0;
+			auto g = double(j) / (image_height-1);
+			auto b = (double(i)+double(j)) / (image_width+image_height-2);
 
 			int ir = int(255.999 * r);
 			int ig = int(255.999 * g);
