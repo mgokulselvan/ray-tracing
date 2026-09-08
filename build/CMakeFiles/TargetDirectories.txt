@@ -1,0 +1,3 @@
+/home/songoku/ray-tracing/build/CMakeFiles/raytrace.dir
+/home/songoku/ray-tracing/build/CMakeFiles/edit_cache.dir
+/home/songoku/ray-tracing/build/CMakeFiles/rebuild_cache.dir
