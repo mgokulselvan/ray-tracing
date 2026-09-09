@@ -4,7 +4,20 @@
 
 #include<iostream>
 
+
+bool hit_sphere(const point3& center, double radius, const ray&r ){
+	vec3 oc = center - r.origin();//basically direction, from ray's starting position to the sphere's center
+	auto a = dot(r.direction(), r.direction());
+	auto b = -2.0 * dot(r.direction(), oc);
+	auto c = dot(oc,oc) - radius*radius;
+	auto discriminant = b*b - 4*a*c;
+	return (discriminant >=0); //only tells if it hits the sphere or not, we dont know what angle or anything which means, if discriminant >=0 it means either 2 or 1 root, but if discriminant <0 it means roots are imaginary, and the rays dont intersect with the sphere for any value of t
+}
+
 color ray_color(const ray& r) {
+	if(hit_sphere(point3(0,0,-1),0.5,r))
+		return color(1,0,0);
+
 	vec3 unit_direction = unit_vector(r.direction());
 	auto a=0.5*(unit_direction.y()+1.0);
 	return (1.0-a)*color(1.0,1.0,1.0) + a*color(0.5,0.7,1.0);
