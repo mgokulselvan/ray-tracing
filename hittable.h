@@ -22,7 +22,7 @@ class hittable {
 	public:
 		virtual ~hittable() = default; // destructor, telling c++ to do it itself
 		
-		virtual bool hit(const ray& r, double ray_tmin, double ray_tmax, hit_record& rec) const = 0; // every class that inherits this class must overwrite this function
+		virtual bool hit(const ray& r, interval ray_t, hit_record& rec) const = 0; // every class that inherits this class must overwrite this function
 };
 
 #endif
