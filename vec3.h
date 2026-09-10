@@ -1,5 +1,5 @@
 #ifndef VEC3_H //header guard- if this header file havent been defined in the file that imports this, THEN, define it
-#define VEC3_H
+#define VEC3_H//this is like associating this variable with a file, so if it tries importing this class again, the above line checks if this variable that we have defined is in that file, if it is, it skips it, if not, then it defines this variable so that this scenario doesnt happen , and proceeds to define the class
 
 #include "rtweekend.h"
 

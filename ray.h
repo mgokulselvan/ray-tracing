@@ -18,7 +18,7 @@ class ray{
 		const point3& origin() const { return orig; }//returns an immutable reference to its member orig, users can use reference, or make mutable copy of it
 		const vec3& direction() const { return dir; }
 
-		point3 at(double t) const {
+		point3 at(double t) const {//whats the position of our beloved ray at some "t", i made an analogy that "t" means time, which isnt true, but is a good analogy , because in this world its not really time, its just a parameter which decides the position of the ray (its a pretty good analogy)
 			return orig + t*dir;
 		}
 

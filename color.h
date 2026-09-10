@@ -7,7 +7,7 @@
 
 using color = vec3;
 
-void write_color(std::ostream& out,const color& pixel_color) {
+void write_color(std::ostream& out,const color& pixel_color) {//writes ONE pixel to whatever standard output configured
 	auto r = pixel_color.x();
 	auto g = pixel_color.y();
 	auto b = pixel_color.z();

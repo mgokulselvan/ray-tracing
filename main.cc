@@ -8,7 +8,7 @@
 int main(){
 	
 	// Za Warudo 
-	hittable_list world;
+	hittable_list world;//world of "ray" hittable objects
 	world.add(make_shared<sphere>(point3(0,0,-1),0.5));
 	//world.add(make_shared<sphere>(point3(-0.5,0,-1),0.5));
 	//world.add(make_shared<sphere>(point3(0.5,0,-1),0.5));

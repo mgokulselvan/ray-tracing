@@ -1,7 +1,7 @@
 #ifndef INTERVAL_H
 #define INTERVAL_H
 
-class interval {
+class interval {//used to define t values range between which the ray can travel , as you know position of the ray is a function of t, so this affects the number of positions that the ray can have
 	public:
 		double min, max;
 
