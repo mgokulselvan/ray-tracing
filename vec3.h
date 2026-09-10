@@ -1,8 +1,7 @@
 #ifndef VEC3_H //header guard- if this header file havent been defined in the file that imports this, THEN, define it
 #define VEC3_H
 
-#include <cmath>
-#include <iostream>
+#include "rtweekend.h"
 
 
 class vec3{

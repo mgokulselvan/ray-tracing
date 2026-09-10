@@ -1,13 +1,11 @@
 #ifndef HITTABLE_LIST_H
 #define HITTABLE_LIST_H
 
-#include "hittable.h"
-
-#include <memory>
+#include "rtweekend.h"
 #include <vector>
 
-using std::make_shared;//pointer to an allocated type , has reference counting, increases counter each time some variable refers to it, safely deletes the object when all the pointers to this object go out of scope
-using std::shared_ptr;//this is the return type of make_shared, pointers refering to it are of this type
+//using std::make_shared;//pointer to an allocated type , has reference counting, increases counter each time some variable refers to it, safely deletes the object when all the pointers to this object go out of scope
+//using std::shared_ptr;//this is the return type of make_shared, pointers refering to it are of this type
 
 class hittable_list : public hittable {
 	public:
