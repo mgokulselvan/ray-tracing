@@ -45,6 +45,17 @@ class vec3{
 		double length_squared() const {
 			return e[0]*e[0] + e[1]*e[1] + e[2]*e[2];
 		}
+
+
+		static vec3 random() {
+			return vec3(random_double(),random_double(),random_double());
+		}
+
+		static vec3 random(double min, double max) {
+			return vec3(random_double(min,max), random_double(min,max),random_double(min,max));
+		}
+
+
 };//all functions within the class modify the left hand vec3 object
   //all functions outside dont modify left hand vec3 object, and maybe even modify right hand vec3 object too, or create new object
 
@@ -94,4 +105,22 @@ class vec3{
 		inline vec3 unit_vector(const vec3& v){
 			return v / v.length();
 		}
+
+		inline vec3 random_unit_vector() {
+			while(true) {
+				auto p = vec3::random(-1,1);//generate a vector randomly, we could have generated it so that it stays within a unit sphere, but we do this , because, distribution of random from -1 to 1 , ensures that the probability of getting all direction is equal which is needed for diffuse(matte) materials
+				auto lensq = p.length_squared();
+				if(1e-160 <= lensq && lensq <= 1)//the vector cant be lesser than some value, because if done so , the sqrt of its length becomes infinite, because it so close to 0, and its length <=1 , because it should be within unit sphere
+					return p / sqrt(lensq);//return it , but normalized, basically unit vector
+			}
+		}
+		
+		inline vec3 random_on_hemisphere(const vec3& normal) {
+			vec3 on_unit_sphere = random_unit_vector();
+			if(dot(on_unit_sphere, normal) > 0.0)//In the same hemisphere as the normal, so that we get a vector which is in general direction as the normal
+				return on_unit_sphere;//if so , just return it
+			else
+			 return -on_unit_sphere;//if its not, then flip it, which will make it in general direction of the normal
+		}
+
 #endif
