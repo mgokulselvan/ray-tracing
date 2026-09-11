@@ -9,6 +9,7 @@ class camera {
 		double aspect_ratio = 1.0; //ratio of image -width over height
 		int image_width = 100; //randered image width in pixel count
 		int samples_per_pixel = 10; //how many rays to send through each pixel into the world
+		int max_depth = 10; //max number of ray bounce, which controls the number of recursions when the ray hits a surface
 
 		void render(const hittable& world) {
 			initialize();
@@ -28,7 +29,7 @@ class camera {
 
 					for(int sample = 0; sample < samples_per_pixel; sample++) {
 						ray r = get_ray(i,j);
-						pixel_color+=ray_color(r,world);
+						pixel_color+=ray_color(r,max_depth,world);
 					}
 					/*
 					 * this is point sampling, which leads to aliasing, the jagged boundaries on our rendered images, in real life , this doesnt happen, because image is continues, and instead of harsh jaggies, we have smooth blend between foreground and background, we do this by sending multiples samples through a single pixel for all pixels on the image
@@ -102,12 +103,16 @@ class camera {
 			return vec3(random_double() - 0.5, random_double() - 0.5, 0);
 		}
 
-		color ray_color(const ray& r,const hittable& world) const {
+		color ray_color(const ray& r,int depth, const hittable& world) const {
+
+			if(depth <=0 )//if ray has bounced the max limit and still hasnt hit anything, we just consider it as black, pretty sure after these many bounces, all the energy has been absorbed by something anyway
+				return color(0,0,0);
+
 			hit_record rec;
 
 			if (world.hit(r,interval(0,infinity),rec)){
 				vec3 direction = random_on_hemisphere(rec.normal);
-				return 0.5 * ray_color(ray(rec.p,direction), world);//the 0.5 is for the color, a gray color, we are telling that gray absorbes only .5 of the light that hits it, (thats why its gray),(thats how physics work)
+				return 0.5 * ray_color(ray(rec.p,direction), depth-1, world);//the 0.5 is for the color, a gray color, we are telling that gray absorbes only .5 of the light that hits it, (thats why its gray),(thats how physics work)
 			}
 
 			vec3 unit_direction = unit_vector(r.direction());
