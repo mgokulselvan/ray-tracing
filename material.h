@@ -36,16 +36,18 @@ class lambertian : public material {//for the diffuse ( matte like) surfaces
 
 class metal : public material {
 	public:
-		metal(const color& albedo) : albedo(albedo) {}
+		metal(const color& albedo, double fuzz) : albedo(albedo), fuzz(fuzz < 1 ? fuzz : 1) {}//we chose range 0-1 for fuzz, 0 being not fuzzy at all, 1 being maximum fuzz
 
 		bool scatter(const ray& r_in, const hit_record& rec, color& attenuation, ray& scattered) const override {
 			vec3 reflected = reflect(r_in.direction(), rec.normal);
-			scattered = ray(rec.p, reflected);
-			attenuation = albedo;
-			return true;
+			reflected = unit_vector(reflected) + (fuzz * random_unit_vector());
+			scattered = ray(rec.p, reflected);//first we created normal reflected ray, then create a random unit vector, ie just choose a random direction, and the fuzz param decides how much this random direction decides the final scattered or reflected array, more the fuzz, more the affect of this random direction on the scattered/reflected light more the fuzz, if less,if 0 , this random direction gets converted to 0, and adding 0 to reflected ray doesnt make a difference, so it is as if it didnt fuzz at all, and is fully shiny unfuzzy 
+			attenuation = albedo; //how much of the light incident on it , it reflects
+			return (dot(scattered.direction(), rec.normal) > 0);//if the direction of the scattered light is toward the sphere, we just cancel it saying reflection didnt happen, if it went in direction of the normal at the point of sphere where ray hits, we say that reflection did happen, and calculate the next place where ray went to 
 		}
 	private:
 		color albedo;
+		double fuzz;
 };
 
 #endif
