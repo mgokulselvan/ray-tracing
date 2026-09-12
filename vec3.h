@@ -56,6 +56,11 @@ class vec3{
 		}
 
 
+		bool near_zero() const{
+			//return true if vector is close to zero in all three dimensions
+			auto s = 1e-8;
+			return (std::fabs(e[0]) < s) && (std::fabs(e[1]) < s) && (std::fabs(e[2]) < s); 
+		}
 };//all functions within the class modify the left hand vec3 object
   //all functions outside dont modify left hand vec3 object, and maybe even modify right hand vec3 object too, or create new object
 
@@ -121,6 +126,10 @@ class vec3{
 				return on_unit_sphere;//if so , just return it
 			else
 			 return -on_unit_sphere;//if its not, then flip it, which will make it in general direction of the normal
+		}
+
+		inline vec3 reflect(const vec3& v, const vec3& n) {
+			return v-2*dot(v,n)*n;
 		}
 
 #endif

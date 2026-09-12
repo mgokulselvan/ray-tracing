@@ -2,6 +2,7 @@
 #define HITTABLE_H
 
 #include "rtweekend.h"
+class material;//just declaring so it doesnt give error, its definition will be here later, if we use include, there will be circular importing 
 
 class hit_record {//for each hit , i.e intersection that a ray makes with the object in the world, we store its position , surface normal vector, if its front of the object or the back of it, and also at what "t" value did it hit the object
 	public:
@@ -9,6 +10,7 @@ class hit_record {//for each hit , i.e intersection that a ray makes with the ob
 		vec3 normal;
 		double t;
 		bool front_face;
+		shared_ptr<material> mat;
 
 		//we are setting so that the surface normal always go away from the surface,so here we are tracking if its front face or not and then making so that surface normal is pointing away from the surface
 		void set_face_normal(const ray& r, const vec3& outward_normal){//if the ray is hitting the front of the surface or back of the surface(front and back with respect to the camera)

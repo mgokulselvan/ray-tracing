@@ -2,6 +2,7 @@
 #define CAMERA_H
 
 #include "hittable.h"
+#include "material.h"
 
 class camera {
 	public:
@@ -111,9 +112,16 @@ class camera {
 			hit_record rec;
 
 			if (world.hit(r,interval(0.001,infinity),rec)){//using 0.001 instead of 0 , because a random generated scattered ray might not start flush from the surface of sphere, and might be a bit below or above the sphere surface(this happens because of floating point rounding errors , so its not accurately flush), if its below, then it immediately hits the sphere again, to avoid this , we are giving some min value of t that the t has to be greater than, why we avoid this? , because it keeps hitting within the sphere, and then the outside of the sphere from where this supposed ray inside sphere was a scattering from , gets a dark color, a black spot, as it keeps hitting within the walls of the sphere, this is knows as shadow acne
+				ray scattered;
+				color attenuation;
+				if(rec.mat -> scatter(r, rec, attenuation, scattered))//if the ray hit some other surface, then this ray color is attenuation i.e. how much light it reflects in each color * ray color of ray of light from the surface that is coming to this spot from other place, (that is why we send a ray in that directoin getting to know the color of ray coming from that source, or surface, or whatever it is that the ray is coming from)
+					return attenuation * ray_color(scattered, depth-1, world);
+				return color(0,0,0);
+/*
 				//vec3 direction = random_on_hemisphere(rec.normal);
 				vec3 direction = rec.normal + random_unit_vector();//this ensure lambertian spheres distribution which is close to how "diffuse" materials usually scatter light, rather than uniformly in any direction , its more likely , in direction near to the normal of the point of intersection
 				return 0.5 * ray_color(ray(rec.p,direction), depth-1, world);//the 0.5 is for the color, a gray color, we are telling that gray absorbes only .5 of the light that hits it, (thats why its gray),(thats how physics work)
+*/
 			}
 
 			vec3 unit_direction = unit_vector(r.direction());

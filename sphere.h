@@ -8,7 +8,7 @@
 
 class sphere : public hittable {//this sphere is hittable i.e. ray can intersect it,which is required if we have to render it on our image
 	public:
-		sphere(const point3& center, double radius) : center(center), radius(std::fmax(0,radius)) {}
+		sphere(const point3& center, double radius, shared_ptr<material> mat) : center(center), radius(std::fmax(0,radius)), mat(mat) {}
 
 		bool hit(const ray& r, interval ray_t, hit_record& rec) const override {
 			//the below code is a math heavy optimisation of sphere equation , and tells if a point given is in the sphere, on the sphere, or no way near it, which helps us render the sphere in the world among the list of objects
@@ -39,6 +39,7 @@ class sphere : public hittable {//this sphere is hittable i.e. ray can intersect
 			rec.normal = (rec.p - center) / radius;
 			vec3 outward_normal = (rec.p - center) / radius; // /radius to make it an unit vector, we use radius because some genius figured out that to make unit vector instead of doing square root which take so much compute, we use this radius fella, which apparently gives us same answer, how? , unfortunately im not the genius who came up with this math
 			rec.set_face_normal(r,outward_normal);//asking the record to record if this ray is inside the sphere, or outside(if its inside it means its the back surface, if its outside its the face of the object)
+			rec.mat = mat;
 
 			return true;
 		}
@@ -46,6 +47,7 @@ class sphere : public hittable {//this sphere is hittable i.e. ray can intersect
 	private:
 		point3 center;
 		double radius;
+		shared_ptr<material> mat;
 };
 
 #endif
