@@ -50,7 +50,7 @@ class metal : public material {
 		double fuzz;
 };
 
-class dielectric : public material {
+class dielectric : public material {//the one that refracts
 	public:
 		dielectric(double refraction_index) : refraction_index(refraction_index) {}
 	
@@ -59,9 +59,19 @@ class dielectric : public material {
 			double ri = rec.front_face ? (1.0/refraction_index) : refraction_index;
 
 			vec3 unit_direction = unit_vector(r_in.direction());
-			vec3 refracted = refract(unit_direction, rec.normal, ri);
+			double cos_theta = std::fmin(dot(-unit_direction, rec.normal), 1.0);
+			double sin_theta = std::sqrt(1.0 - cos_theta*cos_theta);
 
-			scattered = ray(rec.p, refracted);
+			bool cannot_refract = ri * sin_theta > 1.0;
+			vec3 direction;
+
+			if(cannot_refract)//when its more than acceptance angle, we find this out, by seeing if ri * sin_theta > 1.0, because thats what gives us the angle of refraction, if its > 1.0 then it means it isnt refraction, because sin_theta(here angle of refraction) = ri* sin_theta(angle of incidence) , and it cant be more than 1
+				direction = reflect(unit_direction, rec.normal);
+			else
+				direction = refract(unit_direction, rec.normal, ri);
+
+
+			scattered = ray(rec.p, direction);
 			return true;
 		}
 	private:
