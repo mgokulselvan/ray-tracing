@@ -12,6 +12,9 @@ class camera {
 		int samples_per_pixel = 10; //how many rays to send through each pixel into the world
 		int max_depth = 10; //max number of ray bounce, which controls the number of recursions when the ray hits a surface
 		double vfov = 90; //vertical view angle(field of view)
+		point3 lookfrom = point3(0,0,0);//point from where we are looking from (this is generally the camera position)
+		point3 lookat = point3(0,0,-1);//point at which we are looking at
+		vec3 vup = vec3(0,1,0);//vector pointing towards what is considered as up for the camera
 
 		void render(const hittable& world) {
 			initialize();
@@ -57,6 +60,7 @@ class camera {
 		vec3 pixel_delta_u; //distance from one pixel center to another sidewise (to the right)
 		vec3 pixel_delta_v; //distance from one pixel center to another vertically (below)
 		double pixel_samples_scale; //color scale factor for a sum of pixel samples
+		vec3 u, v, w;//u is vector pointing to the  right of the camera, w is vector pointing back direction of the camera from the point we are looking at, v is vector pointing to the up of the camera
 
 		void initialize() {
 
@@ -66,24 +70,27 @@ class camera {
 
 			pixel_samples_scale = 1.0 / samples_per_pixel;
 
-			auto focal_length = 1.0;
+			auto focal_length = (lookfrom - lookat).length();
 			auto theta = degrees_to_radians(vfov);//converting degrees to radians cuz tan function needs radians
 			auto h = std::tan(theta/2);//we need this for calculating height
 			auto viewport_height = 2 * h * focal_length;//we know the angle, tan of that angle, base length, to get the perpendicular length, we do tan(angle)*base_length(which is focal length) , we multiply this by 2 as a whole, because this only gives half the viewport height , above the camera, for below the camera, we need to add that once more, hence the multiplication by 2
 			auto viewport_width = viewport_height * (double(image_width)/image_height);//using image width and height to calculate view port width instead of aspect ratio, because aspect ratio of image is not exact, due to type casting and checking if its <1
-																					   //
-			center = point3(0,0,0);//x -> leftRight , y-> upDown, z->direction of viewing
+
+			center = lookfrom;//x -> leftRight , y-> upDown, z->direction of viewing
+			w = unit_vector(lookfrom - lookat);
+			u =  unit_vector(cross(vup, w));
+			v = cross(w, u);//cross product produces vector perpendicular to both, its used to make both u and v vector, if you interchange the order, they produce opposite vectors
 
 			//calculate vectors across the horizontal and down the vertical viewport edges.
-			auto viewport_u = vec3(viewport_width, 0,0);
-			auto viewport_v = vec3(0,-viewport_height, 0);
+			auto viewport_u = viewport_width * u;
+			auto viewport_v = viewport_height * -v;
 
 			//calculate the horizontal and vertical delta vectors from pixel to pixel.
 			pixel_delta_u = viewport_u / image_width;
 			pixel_delta_v = viewport_v / image_height;
 
 			//calculate location of upper left corner of immage with using center as reference(as we have calculated it according to our camera position)
-			auto viewport_upper_left = center - vec3(0,0,focal_length) - viewport_u/2 - viewport_v/2;
+			auto viewport_upper_left = center - (focal_length * w) - viewport_u/2 - viewport_v/2;
 
 			//calculate location of the upper left pixel which is the first pixel of image and hence also of that to be rendered
 			pixel00_loc = viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v);
