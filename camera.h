@@ -11,6 +11,7 @@ class camera {
 		int image_width = 100; //randered image width in pixel count
 		int samples_per_pixel = 10; //how many rays to send through each pixel into the world
 		int max_depth = 10; //max number of ray bounce, which controls the number of recursions when the ray hits a surface
+		double vfov = 90; //vertical view angle(field of view)
 
 		void render(const hittable& world) {
 			initialize();
@@ -66,7 +67,9 @@ class camera {
 			pixel_samples_scale = 1.0 / samples_per_pixel;
 
 			auto focal_length = 1.0;
-			auto viewport_height = 2.0;
+			auto theta = degrees_to_radians(vfov);//converting degrees to radians cuz tan function needs radians
+			auto h = std::tan(theta/2);//we need this for calculating height
+			auto viewport_height = 2 * h * focal_length;//we know the angle, tan of that angle, base length, to get the perpendicular length, we do tan(angle)*base_length(which is focal length) , we multiply this by 2 as a whole, because this only gives half the viewport height , above the camera, for below the camera, we need to add that once more, hence the multiplication by 2
 			auto viewport_width = viewport_height * (double(image_width)/image_height);//using image width and height to calculate view port width instead of aspect ratio, because aspect ratio of image is not exact, due to type casting and checking if its <1
 																					   //
 			center = point3(0,0,0);//x -> leftRight , y-> upDown, z->direction of viewing
