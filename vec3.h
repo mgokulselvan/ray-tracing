@@ -138,5 +138,13 @@ class vec3{
 			vec3 r_out_parallel = -std::sqrt(std::fabs(1.0 - r_out_prep.length_squared())) * n;
 			return r_out_prep + r_out_parallel;
 		}
+		
+		inline vec3 random_in_unit_disk() {//generate random points only in 2d, such that they are lying within the unit circle
+			while(true) {
+				auto p = vec3(random_double(-1,1), random_double(-1,1), 0);
+				if(p.length_squared() < 1)
+					return p;
+			}
+		}
 
 #endif

@@ -16,6 +16,9 @@ class camera {
 		point3 lookat = point3(0,0,-1);//point at which we are looking at
 		vec3 vup = vec3(0,1,0);//vector pointing towards what is considered as up for the camera
 
+		double defocus_angle = 0; //we use this angle, and from this , we calculate the radius of the disk at the camera from where a point is randomly selected as origin of the light,this angle is the angle formed at the cone from the point where we are looking at , towards the camera,its a cone because here we are considering camera as a disk rather than one point, that is why , this angle is 0 when camera is just a point, if its more, then camera isnt a point, rather, its a disk, and we use this to get blur
+		double focus_dist = 10;//how far the object is at where we want focus on, this is where the viewport lies (previously we used focal_length for this purpose, but since both have same values for our project we use replaced it)
+
 		void render(const hittable& world) {
 			initialize();
 			//Rendering
@@ -61,6 +64,8 @@ class camera {
 		vec3 pixel_delta_v; //distance from one pixel center to another vertically (below)
 		double pixel_samples_scale; //color scale factor for a sum of pixel samples
 		vec3 u, v, w;//u is vector pointing to the  right of the camera, w is vector pointing back direction of the camera from the point we are looking at, v is vector pointing to the up of the camera
+		vec3 defocus_disk_u;
+		vec3 defocus_disk_v;
 
 		void initialize() {
 
@@ -70,10 +75,10 @@ class camera {
 
 			pixel_samples_scale = 1.0 / samples_per_pixel;
 
-			auto focal_length = (lookfrom - lookat).length();
+			//auto focal_length = (lookfrom - lookat).length();
 			auto theta = degrees_to_radians(vfov);//converting degrees to radians cuz tan function needs radians
 			auto h = std::tan(theta/2);//we need this for calculating height
-			auto viewport_height = 2 * h * focal_length;//we know the angle, tan of that angle, base length, to get the perpendicular length, we do tan(angle)*base_length(which is focal length) , we multiply this by 2 as a whole, because this only gives half the viewport height , above the camera, for below the camera, we need to add that once more, hence the multiplication by 2
+			auto viewport_height = 2 * h * focus_dist; //focal_length;//we know the angle, tan of that angle, base length, to get the perpendicular length, we do tan(angle)*base_length(which is focal length) , we multiply this by 2 as a whole, because this only gives half the viewport height , above the camera, for below the camera, we need to add that once more, hence the multiplication by 2
 			auto viewport_width = viewport_height * (double(image_width)/image_height);//using image width and height to calculate view port width instead of aspect ratio, because aspect ratio of image is not exact, due to type casting and checking if its <1
 
 			center = lookfrom;//x -> leftRight , y-> upDown, z->direction of viewing
@@ -90,20 +95,24 @@ class camera {
 			pixel_delta_v = viewport_v / image_height;
 
 			//calculate location of upper left corner of immage with using center as reference(as we have calculated it according to our camera position)
-			auto viewport_upper_left = center - (focal_length * w) - viewport_u/2 - viewport_v/2;
+			auto viewport_upper_left = center - (focus_dist * w) - viewport_u/2 - viewport_v/2;
 
 			//calculate location of the upper left pixel which is the first pixel of image and hence also of that to be rendered
 			pixel00_loc = viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v);
 
+			auto defocus_radius = focus_dist * std::tan(degrees_to_radians(defocus_angle/2));
+			defocus_disk_u = u * defocus_radius;//right of radius is just whatever was right with respect to camera * radius of the circle(disk)
+			defocus_disk_v = v * defocus_radius;//up of radius is just whatever was up with respect to camera * radius of the circle(disk)
 		}
 
 		ray get_ray(int i, int j) const {
-			//construct a ray originating from origin and directed at randomly sampled point around the pixel location given by i and j
+			//construct a ray originating from defocus disk and directed at randomly sampled point around the pixel location given by i and j
 			auto offset = sample_square();
 
 			auto pixel_sample = pixel00_loc + ((i+offset.x()) * pixel_delta_u) + ((j + offset.y()) * pixel_delta_v);//previously since we only took middle of each pixel , we were doing pixel_loc +(i*pixel_delta_u) + (j*pixel_delta_v), now we are adding offset to that i and j, wihch can only be between -0.5 and 0.5, and hence it means, it will stay within the pixel
 
-			auto ray_origin = center;
+			auto ray_origin = (defocus_angle <=0)? center:defocus_disk_sample();//if defocus angle was 0, it means aperture is just one point, camera is only at one point
+																				//if it isnt 0, shoot a ray from any random point on the disk to the "look_at" position
 			auto ray_direction = pixel_sample - ray_origin;
 
 			return ray(ray_origin, ray_direction);
@@ -112,6 +121,12 @@ class camera {
 		vec3 sample_square() const {//returns offset between -0.5 to 0.5 for each dimension
 			//Returns the vector to a random point in the [-0.5,-0.5] - [0.5,0.5] unit square
 			return vec3(random_double() - 0.5, random_double() - 0.5, 0);
+		}
+
+		point3 defocus_disk_sample() const {
+			//return random point in the defocus disk
+			auto p = random_in_unit_disk();
+			return center + (p[0] * defocus_disk_u) + (p[1] * defocus_disk_v);
 		}
 
 		color ray_color(const ray& r,int depth, const hittable& world) const {
