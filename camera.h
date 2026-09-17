@@ -114,8 +114,9 @@ class camera {
 			auto ray_origin = (defocus_angle <=0)? center:defocus_disk_sample();//if defocus angle was 0, it means aperture is just one point, camera is only at one point
 																				//if it isnt 0, shoot a ray from any random point on the disk to the "look_at" position
 			auto ray_direction = pixel_sample - ray_origin;
+			auto ray_time = random_double();//time goes from 0 to 1, instead of sending all rays to one particular time, we send it to different times, and take an average of that, this makes it blurry (we used this for antialiasing, but now , its so that we simulate camera shutter being open for some time while the objects move in the world)
 
-			return ray(ray_origin, ray_direction);
+			return ray(ray_origin, ray_direction, ray_time);//we send another ray into the world in the same time stamp 
 		}
 
 		vec3 sample_square() const {//returns offset between -0.5 to 0.5 for each dimension
@@ -129,7 +130,7 @@ class camera {
 			return center + (p[0] * defocus_disk_u) + (p[1] * defocus_disk_v);
 		}
 
-		color ray_color(const ray& r,int depth, const hittable& world) const {
+		color ray_color(const ray& r,int depth, const hittable& world) const {//ray r has the info of what time it is travelling in
 
 			if(depth <=0 )//if ray has bounced the max limit and still hasnt hit anything, we just consider it as black, pretty sure after these many bounces, all the energy has been absorbed by something anyway
 				return color(0,0,0);
