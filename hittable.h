@@ -2,6 +2,8 @@
 #define HITTABLE_H
 
 #include "rtweekend.h"
+#include "aabb.h"
+
 class material;//just declaring so it doesnt give error, its definition will be here later, if we use include, there will be circular importing 
 
 class hit_record {//for each hit , i.e intersection that a ray makes with the object in the world, we store its position , surface normal vector, if its front of the object or the back of it, and also at what "t" value did it hit the object
@@ -26,6 +28,7 @@ class hittable {//this is just an interface, meant to have a bunch of classes th
 		
 		virtual bool hit(const ray& r, interval ray_t, hit_record& rec) const = 0; // every class that inherits this class must overwrite this function
 	   //meant to tell if the ray given hits the physical geometric object within the given interval of t
+		virtual aabb bounding_box() const = 0;
 };
 
 #endif

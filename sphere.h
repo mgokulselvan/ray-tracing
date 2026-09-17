@@ -9,9 +9,28 @@
 class sphere : public hittable {//this sphere is hittable i.e. ray can intersect it,which is required if we have to render it on our image
 	public:
 		//Stationary sphere, stays one place for time =0 to 1
-		sphere(const point3& static_center, double radius, shared_ptr<material> mat) : center(static_center, vec3(0,0,0)), radius(std::fmax(0,radius)), mat(mat) {}
+		sphere(const point3& static_center, double radius, shared_ptr<material> mat) : center(static_center, vec3(0,0,0)), radius(std::fmax(0,radius)), mat(mat) {
+			auto rvec = vec3(radius, radius, radius);
+			bbox = aabb(static_center - rvec, static_center + rvec);
+			//so basically its bounding box range is 
+			//center + go up by radius units, right by radius units and backward (in terms of camera/depth/just +z) by radius units
+			//and
+			//center + go down by radius units, left by radius units and forward (in terms of camera/depth/just +z) by radius units
+			//this forms a 3d box, such that point are at the 2 opposite corners of the sphere
+		}
 		//moving sphere , different centers at diffeetern time 
-		sphere(const point3& center1, const point3& center2, double radius, shared_ptr<material> mat) : center(center1, center2-center1), radius(std::fmax(0,radius)), mat(mat) {}
+		sphere(const point3& center1, const point3& center2, double radius, shared_ptr<material> mat) : center(center1, center2-center1), radius(std::fmax(0,radius)), mat(mat) {
+			auto rvec = vec3(radius, radius, radius);
+			aabb box1(center.at(0) - rvec, center.at(0) + rvec);//center at time = 0 , and finding the bounding box for the sphere at that center
+			aabb box2(center.at(1) - rvec, center.at(1) + rvec);//center at time = 1, and finding the bounding box for the sphere at that center
+			//time here is only from time=0 to 1
+			//think of it as at time=0 the position of objects is where it would be when the camera shutter opens
+			//and at time = 1,the position of the objects is where it would be just before the camera shutter closes
+			//that is why t=0 to 1 is enough
+			bbox = aabb(box1, box2);
+
+
+		}
 
 		bool hit(const ray& r, interval ray_t, hit_record& rec) const override {
 			//the below code is a math heavy optimisation of sphere equation , and tells if a point given is in the sphere, on the sphere, or no way near it, which helps us render the sphere in the world among the list of objects
@@ -49,11 +68,14 @@ class sphere : public hittable {//this sphere is hittable i.e. ray can intersect
 			return true;
 		}
 
+		aabb bounding_box() const override { return bbox; }
+		
 	private:
 		//point3 center;
 		ray center;//center is now a ray instead of point, because depending on the t value of this center ray, the sphere can exist at different places
 		double radius;
 		shared_ptr<material> mat;
+		aabb bbox;
 };
 
 #endif
