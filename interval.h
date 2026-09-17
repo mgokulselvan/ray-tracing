@@ -10,6 +10,13 @@ class interval {//used to define t values range between which the ray can travel
 
 		interval(double min, double max): min(min), max(max) {}
 
+		interval(const interval& a, const interval& b){
+			//create interval which closely encloses the intervals a and b
+			//required to make big bounding box consisting of smaller bounding boxes, done by combining the intervals of each axis
+			min = a.min <= b.min ? a.min : b.min;
+			max = a.max >= b.max ? a.max : b.max;
+		}
+
 		double size() const {
 			return max - min;
 		}
