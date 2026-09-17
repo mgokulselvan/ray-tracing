@@ -28,6 +28,12 @@ class interval {//used to define t values range between which the ray can travel
 			return x;
 		}
 
+		interval expand(double delta) const {
+			auto padding = delta/2;
+			return interval(min - padding, max + padding);
+		}
+
+
 		static const interval empty, universe;
 };
 
