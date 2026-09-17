@@ -28,6 +28,10 @@ inline double random_double(double min, double max){//random num in the interval
 	return min + (max-min)*random_double();
 }
 
+inline double random_int(double min, double max){//random integer in the interval [min,max]
+	return int(random_double(min,max+1));
+}
+
 //common headers
 #include "color.h"
 #include "ray.h"

@@ -60,7 +60,7 @@ class sphere : public hittable {//this sphere is hittable i.e. ray can intersect
 			rec.t = root;
 			rec.p = r.at(rec.t);
 			//now normal depends on current center, which just means center at that time, now the objects have time as a parameter to find the position of the object in the vector 3d space at that time which is needed to find how ray bounces off/ refracts from surface
-			rec.normal = (rec.p - current_center) / radius;
+			//rec.normal = (rec.p - current_center) / radius; redundant
 			vec3 outward_normal = (rec.p - current_center) / radius; // /radius to make it an unit vector, we use radius because some genius figured out that to make unit vector instead of doing square root which take so much compute, we use this radius fella, which apparently gives us same answer, how? , unfortunately im not the genius who came up with this math
 			rec.set_face_normal(r,outward_normal);//asking the record to record if this ray is inside the sphere, or outside(if its inside it means its the back surface, if its outside its the face of the object)
 			rec.mat = mat;

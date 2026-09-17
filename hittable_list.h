@@ -1,7 +1,8 @@
 #ifndef HITTABLE_LIST_H
 #define HITTABLE_LIST_H
 
-#include "rtweekend.h"
+#include "aabb.h"
+#include "hittable.h"
 #include <vector>
 
 //using std::make_shared;//pointer to an allocated type , has reference counting, increases counter each time some variable refers to it, safely deletes the object when all the pointers to this object go out of scope
@@ -18,6 +19,7 @@ class hittable_list : public hittable {//used to define a world of objects of wh
 
 		void add(shared_ptr<hittable> object) {//add new hittable object to the existing world/environment/whatever you wanna call it
 			objects.push_back(object);
+			bbox = aabb(bbox, object->bounding_box());//object (like sphere) has bounding box created on object instantiation, here we are just creating bbox using the previous bbox (of the objects of the hittable_oist before adding this new hittable object) and the bbox of the new object
 		}
 
 		bool hit(const ray& r, interval ray_t, hit_record& rec) const override {
@@ -37,5 +39,10 @@ class hittable_list : public hittable {//used to define a world of objects of wh
 			}
 			return hit_anything;
 		}
+
+		aabb bounding_box() const override { return bbox; }
+
+	private:
+		aabb bbox;
 };
 #endif
