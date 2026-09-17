@@ -15,7 +15,16 @@ class bvh_node : public hittable {
 		}
 
 		bvh_node(std::vector<shared_ptr<hittable>>& objects, size_t start, size_t end){//start of the list of nodes under this node as a tree and the end of it
-			int axis = random_int(0,2);//randomly choose the axis to split along
+			//int axis = random_int(0,2);//randomly choose the axis to split along
+			//not choosing random axis, instead to make it more optimal choosing one with longest side, to get the most number of subdivisions
+
+			//build bounding box of the span of source objects
+			bbox = aabb::empty;
+			for(size_t object_index = start; object_index < end; object_index++)
+				bbox = aabb(bbox, objects[object_index]->bounding_box());
+
+			int axis = bbox.longest_axis();
+
 			auto comparator = (axis == 0) ? box_x_compare//depending on the random axis, choose a comparator which will sort the bounding boxes accordingly
 				: (axis == 1) ? box_y_compare
 				: box_z_compare;
@@ -33,7 +42,8 @@ class bvh_node : public hittable {
 				left = make_shared<bvh_node>(objects, start, mid);
 				right = make_shared<bvh_node>(objects, mid, end);
 			}
-			bbox = aabb(left->bounding_box(), right->bounding_box());
+			//bbox = aabb(left->bounding_box(), right->bounding_box());
+			//since we are generating bounding box first, instead of doing it recursively and while backtracing, we are first adding all the objects to bounding box and then finding axis, divinding and so on so forth
 		}
 
 		bool hit(const ray& r, interval ray_t, hit_record& rec) const override {
