@@ -1,6 +1,7 @@
 #ifndef TEXTURE_H
 #define TEXTURE_H
 #include "rtweekend.h"
+#include "rtw_stb_image.h"
 
 class texture {
 	public:
@@ -43,6 +44,30 @@ class checker_texture : public texture {//this is a solid(or spatial) texture i.
 		double inv_scale;// scale tells how big the boxes in checker_texture be, inv_scale is inverse of scale, this is used to scale the position of the point on the object, and based on it,the color is assigned (using isEven) ,and indirectly this makes it so that the range in which isEven is True or False changes , and because of this the size of boxes differ
 		shared_ptr<texture> even;
 		shared_ptr<texture> odd;
+};
+
+class image_texture : public texture {
+	public:
+		image_texture(const char* filename) : image(filename) {}
+		color value(double u, double v, const point3& p) const override{
+			//if no texture data, currently return cyan solid_color texture
+			if( image.height() <=0 ) return color(0,0,0);
+
+			//clamp input texture coordinates to [0,1] x [1,0]
+			u = interval(0,1).clamp(u);
+			v = 1.0 - interval(0,1).clamp(v);
+
+			auto i = int(u*image.width());
+			auto j = int(v*image.height());
+			auto pixel = image.pixel_data(i,j);
+
+			auto color_scale = 1.0 / 255.0;
+
+			return color(color_scale*pixel[0], color_scale*pixel[1], color_scale*pixel[2]);
+		}
+
+	private:
+		rtw_image image;
 };
 
 #endif
