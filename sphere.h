@@ -64,6 +64,7 @@ class sphere : public hittable {//this sphere is hittable i.e. ray can intersect
 			vec3 outward_normal = (rec.p - current_center) / radius; // /radius to make it an unit vector, we use radius because some genius figured out that to make unit vector instead of doing square root which take so much compute, we use this radius fella, which apparently gives us same answer, how? , unfortunately im not the genius who came up with this math
 			rec.set_face_normal(r,outward_normal);//asking the record to record if this ray is inside the sphere, or outside(if its inside it means its the back surface, if its outside its the face of the object)
 			rec.mat = mat;
+			get_sphere_uv(outward_normal, rec.u, rec.v);//store in the record, the u,v coordinates , which we need so that we can lookup what color was on that 2D coordinate and using that, simulate light and its "physics" accuratly according to the texture of the object
 
 			return true;
 		}
@@ -76,6 +77,20 @@ class sphere : public hittable {//this sphere is hittable i.e. ray can intersect
 		double radius;
 		shared_ptr<material> mat;
 		aabb bbox;
+
+		static void get_sphere_uv(const point3& p, double& u, double& v){//function that maps the 3d coordinates of a sphere to (u,v) which are 2D coordinates , so basically , 3d position of point to 2d coordinates that indicates the position of the point on the sphere if it was made into a 2d surface
+			//p is the point on the sphere
+			// u is the normalized angular position around the sphere
+			//    (how far around from the start of the texture the point is)
+			// v is the normalized angular position from bottom to top
+			//    (how far from the bottom to the top of the texture the point is)
+
+			auto theta = std::acos(-p.y());
+			auto phi = std::atan2(-p.z(), p.x()) + pi;
+
+			u = phi / (2*pi);
+			v = theta / pi;
+		}
 };
 
 #endif
