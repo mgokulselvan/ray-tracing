@@ -23,7 +23,7 @@ class solid_color : public texture {//all points on the objects of this texture 
 		color albedo;
 };
 
-class checker_texture : public texture {
+class checker_texture : public texture {//this is a solid(or spatial) texture i.e. the color depends on the 3d coordinates, it colors the space itself, instead of the surface of the object
 	public:
 		checker_texture(double scale, shared_ptr<texture> even, shared_ptr<texture> odd) : inv_scale(1.0/scale), even(even), odd(odd) {}
 
