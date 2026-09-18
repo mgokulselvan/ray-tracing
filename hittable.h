@@ -12,6 +12,8 @@ class hit_record {//for each hit , i.e intersection that a ray makes with the ob
 		vec3 normal;
 		double t;
 		bool front_face;
+		double u;//surface coordinates of the ray-object(where the ray hit ON THE OBJECT (point3 p is just overvall position in the 3d vector space)) hit point
+		double v;//surface coordinates of the ray-object hit point, used for texture mapping
 		shared_ptr<material> mat;
 
 		//we are setting so that the surface normal always go away from the surface,so here we are tracking if its front face or not and then making so that surface normal is pointing away from the surface

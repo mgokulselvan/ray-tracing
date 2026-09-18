@@ -2,6 +2,7 @@
 #define MATERIAL_H
 
 #include "hittable.h"
+#include "texture.h"
 //the material class needs the time only because it creates a ray and sends it back to the one which called it, not really send it back , but its reference and it puts it to that and the calling function uses it and bla bla bla, so you know what im saying, the scatter logic doesnt depend on time, because, the scatter function only gets what ray hits it, angle and stuff
 
 //think of concept of time as such: at time=0 the position of objects is where it would be when the camera shutter opens
@@ -20,7 +21,8 @@ class material {
 
 class lambertian : public material {//for the diffuse ( matte like) surfaces
 	public:
-		lambertian(const color& albedo) : albedo(albedo) {}
+		lambertian(const color& albedo) : tex(make_shared<solid_color>(albedo)) {}
+		lambertian(shared_ptr<texture> tex) : tex(tex) {}
 
 		bool scatter(const ray& r_in, const hit_record& rec, color& attenuation, ray& scattered) const override {
 			auto scatter_direction = rec.normal + random_unit_vector();//this is just lambertian using spheres and their kind of distribution
@@ -30,12 +32,16 @@ class lambertian : public material {//for the diffuse ( matte like) surfaces
 				scatter_direction = rec.normal;//if scatter direction is 0 ,it means light goes nowhere, which doesnt make sense, so we just replace it with the normal at the point of intersection
 
 			scattered = ray(rec.p, scatter_direction, r_in.time());//we have to even use time because we need rays position, because the scattering depends on when it was hit, because the object is at different position at different time
-			attenuation = albedo; //attenuation tells how much light's intensity decreases , but how is that equal to albedo?
+
+			//because of texture, the light absorbed by that point depends on what color that region is, which is given by the texture
+			attenuation = tex->value(rec.u, rec.v, rec.p); //attenuation tells how much light's intensity decreases , but how is that equal to albedo?
 								  //the ray we shoot goes in reverse manner as to how it acts in real life, so when you think about it, when light comes , it hits on this surface, we multiply it with albedo(which is attenuatoin) , so if red light ,only 80% gets absorbed, we multiply red component of the light with 0.80(or whatever it is) and then that comes to our camera, hence, it means, red is 80% of the original light intensity of the original light source
 			return true;
 		}
 	private:
-		color albedo;//this tells how much light the material captures, or absorbs, which if you know physics, you will know that, this directly attributes to how it looks like in terms of color, if it absorbs more green light, it will look purple, if it absorbs , red and blue fully it will look green
+		shared_ptr<texture> tex;
+		//its a texture, which tells the albedo of the object at different point in space
+		//this tells how much light the material captures, or absorbs, which if you know physics, you will know that, this directly attributes to how it looks like in terms of color, if it absorbs more green light, it will look purple, if it absorbs , red and blue fully it will look green
 };
 
 class metal : public material {
