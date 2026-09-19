@@ -13,7 +13,9 @@ class aabb {
 
 		aabb()  {} //default AABB is empty, since we havent included any hittable objects, so its just ,empty
 
-		aabb(const interval& x, const interval& y, const interval& z) : x(x), y(y), z(z) {}
+		aabb(const interval& x, const interval& y, const interval& z) : x(x), y(y), z(z) {
+			pad_to_minimums();
+		}
 
 		aabb(const point3& a, const point3& b) {
 			//two points a and b are the two extremes of the bounding box, since its not interval, we dont need to have another check for checking if the intervals are in reverse manner like one interval being [3,8] and another being [5, 0]
@@ -21,6 +23,8 @@ class aabb {
 			x = (a[0] <= b[0]) ? interval(a[0], b[0]) : interval(b[0], a[0]);
 			y = (a[1] <= b[1]) ? interval(a[1], b[1]) : interval(b[1], a[1]);
 			z = (a[2] <= b[2]) ? interval(a[2], b[2]) : interval(b[2], a[2]);
+
+			pad_to_minimums();
 		}
 
 		aabb( const aabb& box0, const aabb& box1){//using two bounding boxes, to construct a new bigger bounding box, bounding both the bounding boxes
@@ -71,6 +75,15 @@ class aabb {
 		}
 
 		static const aabb empty, universe;
+
+	private:
+		void pad_to_minimums() {
+			//if the aabb so that in none of the three dimensions is its length less than delta(to avoid some math problems)
+			double delta = 0.0001;
+			if(x.size()<delta) x = x.expand(delta);
+			if(y.size()<delta) y = y.expand(delta);
+			if(z.size()<delta) z = z.expand(delta);
+		}
 };
 
 const aabb aabb::empty = aabb(interval::empty, interval::empty, interval::empty);
