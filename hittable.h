@@ -33,4 +33,33 @@ class hittable {//this is just an interface, meant to have a bunch of classes th
 		virtual aabb bounding_box() const = 0;
 };
 
+class translate : public hittable {
+	public:
+
+		translate(shared_ptr<hittable> object, const vec3& offset) : object(object), offset(offset) {
+			bbox = object->bounding_box() + offset;//update the bounding box so that ray going there is checked for if they hit the translated object, or else it might miss hitting the places wherever this object gets offsetted to
+		}
+
+		bool hit(const ray& r, interval ray_t, hit_record& rec) const override {
+			//Move ray backwards by offset instead of moving the actual object forward
+			ray offset_r(r.origin() - offset, r.direction(), r.time());
+
+			//check if the offsetted ray can intersect the origin object, and if it does, store data in rec
+			if(!object->hit(offset_r, ray_t, rec))
+				return false;
+
+			//now move the intersection point forwards by offset
+			rec.p += offset;
+
+			return true;
+		}
+
+		aabb bounding_box() const override { return bbox; }
+
+	private:
+		shared_ptr<hittable> object;
+		vec3 offset;
+		aabb bbox;
+};
+
 #endif
