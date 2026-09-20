@@ -6,6 +6,7 @@
 #include "sphere.h"
 #include "material.h"
 #include "texture.h"
+#include "quad.h"
 
 //PPM - R G B as values form 0 to 255 , \n at the end of a line, a group of 3 numbers make one pixel
 void bouncing_spheres(){
@@ -139,11 +140,47 @@ void perlin_spheres() {
 	cam.render(world);
 }
 
+void quads() {
+	hittable_list world;
+
+	//Materials
+	auto left_red = make_shared<lambertian>(color(1.0, 0.2, 0.2));
+	auto back_green = make_shared<lambertian>(color(0.2, 1.0, 0.2));
+	auto right_blue = make_shared<lambertian>(color(0.2, 0.2, 1.0));
+	auto upper_orange = make_shared<lambertian>(color(1.0, 0.5, 0.0));
+	auto lower_teal = make_shared<lambertian>(color(0.2, 0.8, 0.8));
+
+	//quads
+	world.add(make_shared<quad>(point3(-3,-2,5), vec3(0,0,-4), vec3(0,4,0), left_red));
+	world.add(make_shared<quad>(point3(-2,-2,0), vec3(4,0,0), vec3(0,4,0), back_green));
+	world.add(make_shared<quad>(point3(3,-2,1), vec3(0,0,4), vec3(0,4,0), right_blue));
+	world.add(make_shared<quad>(point3(-2,3,1), vec3(4,0,0), vec3(0,0,4), upper_orange));
+	world.add(make_shared<quad>(point3(-2,-3,5), vec3(4,0,0), vec3(0,0,-4), lower_teal));
+
+	camera cam;
+
+	cam.aspect_ratio = 1.0;
+	cam.image_width = 400;
+	cam.samples_per_pixel = 100;
+	cam.max_depth = 50;
+
+	cam.vfov = 80;
+	cam.lookfrom = point3(0,0,9);
+	cam.lookat = point3(0,0,0);
+	cam.vup = vec3(0,1,0);
+
+	cam.defocus_angle = 0;
+
+	cam.render(world);
+
+}
+
 int main(){
-	switch(4) {
+	switch(5) {
 		case 1: bouncing_spheres(); break;
 		case 2: checkered_spheres(); break;
 		case 3: earth(); break;
 		case 4: perlin_spheres(); break;
+		case 5: quads(); break;
 	}
 }
