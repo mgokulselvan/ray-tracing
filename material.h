@@ -12,6 +12,10 @@ class material {
 	public:
 		virtual ~material() = default;
 
+		virtual color emitted(double u, double v, const point3& p) const {//overridable by light sources so that they give actual color instead of black
+			return color(0,0,0);
+		}
+
 		virtual bool scatter(
 				const ray& r_in, const hit_record& rec, color& attenuation, ray& scattered
 				) const {
@@ -94,6 +98,21 @@ class dielectric : public material {//the one that refracts
 			r0 = r0 * r0;
 			return r0 + (1 - r0)*std::pow((1-cosine), 5);
 		}
+};
+
+class diffuse_light : public material {
+	public:
+
+		diffuse_light(shared_ptr<texture> tex) : tex(tex) {}//if the emitting source has some specific texture i.e. like different coloured light at different points of the object
+
+		diffuse_light(const color& emit) : tex(make_shared<solid_color>(emit)) {}//creating a solid color texture for sources which are emitting just one colored light
+
+		color emitted(double u, double v, const point3& p) const override {//u and v are the texture mapping coordinates, i.e. 2d coordinates that tell the position of the point within the object(not the 3d vector space, but the object), and if we just refer to its color in the texture , it returns the color at that point in the texture which is the light source color
+			return tex->value(u, v, p);
+		}
+
+	private:
+		shared_ptr<texture> tex;
 };
 
 #endif
