@@ -400,7 +400,7 @@ void cornelle_smoke_multithreading() {
 
 	cam.aspect_ratio = 1.0;
 	cam.image_width = 600;
-	cam.samples_per_pixel = 10000;
+	cam.samples_per_pixel = 100;
 	cam.max_depth = 50;
 
 	cam.vfov = 40;
@@ -411,7 +411,7 @@ void cornelle_smoke_multithreading() {
 
 	cam.defocus_angle = 0;
 
-	cam.render(world,6);
+	cam.render(world,4);
 }
 
 int main(){

@@ -61,6 +61,7 @@ class camera {
 //rendering parts for implementing multithreading
 		void renderByParts(const hittable& world, int scanLineStart, int scanLineEnd) {
 			for(int j = scanLineStart; j < scanLineEnd; j++){
+				std::clog << "\rScanlines remaining: " <<(scanlines) <<  ' ' << std:: flush;
 				for(int i  = 0;i < image_width;i++){
 					color pixel_color(0,0,0);
 
@@ -70,11 +71,13 @@ class camera {
 					}
 					pixels[j][i] = pixel_samples_scale*pixel_color;
 				}
+				scanlines--;
 			}
 		}
 
 		void render(const hittable& world, int threads){
 				initialize();
+				scanlines = image_height;
 				std::vector<std::thread> workers;
 				int rows_per_thread = image_height/threads;
 				for(int i=0;i<threads;i++){
@@ -107,6 +110,7 @@ class camera {
 
 		//my code for multithreading
 		std::vector<std::vector<color>> pixels;
+		int scanlines;
 
 		void initialize() {
 
