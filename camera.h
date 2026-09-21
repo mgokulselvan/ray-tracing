@@ -3,6 +3,9 @@
 
 #include "hittable.h"
 #include "material.h"
+#include <thread>
+#include <vector>
+#include <functional>
 
 class camera {
 	public:
@@ -55,6 +58,40 @@ class camera {
 
 
 		}
+//rendering parts for implementing multithreading
+		void renderByParts(const hittable& world, int scanLineStart, int scanLineEnd) {
+			for(int j = scanLineStart; j < scanLineEnd; j++){
+				for(int i  = 0;i < image_width;i++){
+					color pixel_color(0,0,0);
+
+					for(int sample = 0; sample < samples_per_pixel; sample++) {
+						ray r = get_ray(i,j);
+						pixel_color+=ray_color(r,max_depth,world);
+					}
+					pixels[j][i] = pixel_samples_scale*pixel_color;
+				}
+			}
+		}
+
+		void render(const hittable& world, int threads){
+				initialize();
+				std::vector<std::thread> workers;
+				int rows_per_thread = image_height/threads;
+				for(int i=0;i<threads;i++){
+					int start = i*rows_per_thread;
+					int end = (i==threads-1)? image_height:(i+1)*rows_per_thread;
+					//std::thread t(renderByParts, world, start, end );
+					workers.emplace_back(&camera::renderByParts,this, std::ref(world), start, end );
+				}
+
+				for(auto& worker : workers)
+					worker.join();
+
+				std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
+				for(auto row : pixels)
+					for(auto pixel : row)
+					write_color(std::cout,pixel);
+		}
 
 	private:
 		/* private cam param*/
@@ -67,6 +104,9 @@ class camera {
 		vec3 u, v, w;//u is vector pointing to the  right of the camera, w is vector pointing back direction of the camera from the point we are looking at, v is vector pointing to the up of the camera
 		vec3 defocus_disk_u;
 		vec3 defocus_disk_v;
+
+		//my code for multithreading
+		std::vector<std::vector<color>> pixels;
 
 		void initialize() {
 
@@ -104,6 +144,11 @@ class camera {
 			auto defocus_radius = focus_dist * std::tan(degrees_to_radians(defocus_angle/2));
 			defocus_disk_u = u * defocus_radius;//right of radius is just whatever was right with respect to camera * radius of the circle(disk)
 			defocus_disk_v = v * defocus_radius;//up of radius is just whatever was up with respect to camera * radius of the circle(disk)
+
+			//my code for multithreading
+			pixels.resize(image_height);
+			for(auto& row : pixels)
+				row.resize(image_width);
 		}
 
 		ray get_ray(int i, int j) const {
