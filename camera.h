@@ -39,10 +39,20 @@ class camera {
 				for(int i  = 0;i < image_width;i++){
 					color pixel_color(0,0,0);
 
+					/* without stratification
 					for(int sample = 0; sample < samples_per_pixel; sample++) {
 						ray r = get_ray(i,j);
 						pixel_color+=ray_color(r,max_depth,world);
 					}
+					*/
+					//stratification applied
+					for(int s_j=0; s_j < sqrt_spp; s_j++){
+						for(int s_i=0; s_i < sqrt_spp; s_i++){
+							ray r = get_ray(i,j,s_i,s_j);
+							pixel_color+=ray_color(r, max_depth, world);
+						}
+					}
+
 					/*
 					 * this is point sampling, which leads to aliasing, the jagged boundaries on our rendered images, in real life , this doesnt happen, because image is continues, and instead of harsh jaggies, we have smooth blend between foreground and background, we do this by sending multiples samples through a single pixel for all pixels on the image
 					auto pixel_center = pixel00_loc + (i*pixel_delta_u) + (j*pixel_delta_v);
@@ -65,10 +75,20 @@ class camera {
 				for(int i  = 0;i < image_width;i++){
 					color pixel_color(0,0,0);
 
+					/* No stratification
 					for(int sample = 0; sample < samples_per_pixel; sample++) {
 						ray r = get_ray(i,j);
 						pixel_color+=ray_color(r,max_depth,world);
 					}
+					*/
+					//stratification applied
+					for(int s_j=0; s_j < sqrt_spp; s_j++){
+						for(int s_i=0; s_i < sqrt_spp; s_i++){
+							ray r = get_ray(i,j,s_i,s_j);
+							pixel_color+=ray_color(r, max_depth, world);
+						}
+					}
+
 					pixels[j][i] = pixel_samples_scale*pixel_color;
 				}
 				scanlines--;
@@ -107,6 +127,9 @@ class camera {
 		vec3 u, v, w;//u is vector pointing to the  right of the camera, w is vector pointing back direction of the camera from the point we are looking at, v is vector pointing to the up of the camera
 		vec3 defocus_disk_u;
 		vec3 defocus_disk_v;
+		//stratification
+		int sqrt_spp; //square root of number of samples per pixel
+		double recip_sqrt_spp; // 1/sqrt_spp
 
 		//my code for multithreading
 		std::vector<std::vector<color>> pixels;
@@ -125,6 +148,11 @@ class camera {
 			auto h = std::tan(theta/2);//we need this for calculating height
 			auto viewport_height = 2 * h * focus_dist; //focal_length;//we know the angle, tan of that angle, base length, to get the perpendicular length, we do tan(angle)*base_length(which is focal length) , we multiply this by 2 as a whole, because this only gives half the viewport height , above the camera, for below the camera, we need to add that once more, hence the multiplication by 2
 			auto viewport_width = viewport_height * (double(image_width)/image_height);//using image width and height to calculate view port width instead of aspect ratio, because aspect ratio of image is not exact, due to type casting and checking if its <1
+
+			sqrt_spp = int(std::sqrt(samples_per_pixel));
+			pixel_samples_scale = 1.0 / (sqrt_spp * sqrt_spp);
+			recip_sqrt_spp = 1.0 / sqrt_spp;
+
 
 			center = lookfrom;//x -> leftRight , y-> upDown, z->direction of viewing
 			w = unit_vector(lookfrom - lookat);
@@ -155,9 +183,11 @@ class camera {
 				row.resize(image_width);
 		}
 
-		ray get_ray(int i, int j) const {
+		ray get_ray(int i, int j, int s_i, int s_j) const {
 			//construct a ray originating from defocus disk and directed at randomly sampled point around the pixel location given by i and j
-			auto offset = sample_square();
+			//sampled around the pixel location i, j for stratified sample square s_i, s_j
+			//this stratification leads to better overall image
+			auto offset = sample_square_stratified(s_i, s_j);
 
 			auto pixel_sample = pixel00_loc + ((i+offset.x()) * pixel_delta_u) + ((j + offset.y()) * pixel_delta_v);//previously since we only took middle of each pixel , we were doing pixel_loc +(i*pixel_delta_u) + (j*pixel_delta_v), now we are adding offset to that i and j, wihch can only be between -0.5 and 0.5, and hence it means, it will stay within the pixel
 
@@ -172,6 +202,12 @@ class camera {
 		vec3 sample_square() const {//returns offset between -0.5 to 0.5 for each dimension
 			//Returns the vector to a random point in the [-0.5,-0.5] - [0.5,0.5] unit square
 			return vec3(random_double() - 0.5, random_double() - 0.5, 0);
+		}
+		vec3 sample_square_stratified(int s_i, int s_j) const {
+			//returns vector to a random point in the square sub-pixel specified by grid indices s_i and s_j, for ideal unit square pixel 
+			auto px = ((s_i + random_double()) * recip_sqrt_spp) - 0.5;
+			auto py = ((s_j + random_double()) * recip_sqrt_spp) - 0.5;
+			return vec3(px, py, 0);
 		}
 
 		point3 defocus_disk_sample() const {
