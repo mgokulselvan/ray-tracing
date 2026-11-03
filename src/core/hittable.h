@@ -2,7 +2,7 @@
 #define HITTABLE_H
 
 #include "rtweekend.h"
-#include "aabb.h"
+#include "../optimize/aabb.h"
 
 class material;//just declaring so it doesnt give error, its definition will be here later, if we use include, there will be circular importing 
 

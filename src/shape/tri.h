@@ -1,9 +1,9 @@
 #ifndef TRI_H
 #define TRI_H
 
-#include "hittable.h"
-#include "hittable_list.h"
-#include "material.h"
+#include "../core/hittable.h"
+#include "../core/hittable_list.h"
+#include "../appearance/material.h"
 
 class tri : public hittable {
 
