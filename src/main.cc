@@ -1,4 +1,7 @@
+
+
 #include "core/rtweekend.h"
+// #include "external/tiny_gltf/tiny_gltf_v3.h"
 #include "optimize/bvh.h"
 #include "core/camera.h"
 #include "core/hittable.h"
@@ -11,6 +14,7 @@
 #include "shape/tri.h"
 #include "core/vec3.h"
 #include <memory>
+#include "reader/gltf2.h"
 
 //PPM - R G B as values form 0 to 255 , \n at the end of a line, a group of 3 numbers make one pixel
 void bouncing_spheres(){
@@ -467,6 +471,33 @@ void traingle_test_one() {
 	cam.render(world,4);
 }
 
+void gltf2_test() {
+	hittable_list world;
+
+        auto red = make_shared<diffuse_light>(color(5, 0, 0));
+
+        tg3_model* model = gltf2_open("./gltf2s/testone.gltf");
+
+        // gltf2_import_into_world(*model, &world,
+        //                         red
+        //                        );
+
+	camera cam;
+
+	cam.aspect_ratio = 1.0;
+	cam.image_width = 600;
+	cam.samples_per_pixel = 10;
+	cam.max_depth = 50;
+	cam.background = color(0,0,0);
+	cam.defocus_angle = 0;
+
+        // gltf2_import_camera(*model, &cam);
+
+        gltf2_close(model);
+
+	cam.render(world,4);
+}
+
 int main(int argc, char* argv[]){
     int choice = 11;
     if (argc > 1) choice = std::stoi(argv[1]);
@@ -482,5 +513,6 @@ int main(int argc, char* argv[]){
     case 9: book2_final(800, 10000, 40); break;
     case 10: cornelle_smoke_multithreading(); break;
     case 11: traingle_test_one(); break;
+    case 12: gltf2_test(); break;
     }
 }
