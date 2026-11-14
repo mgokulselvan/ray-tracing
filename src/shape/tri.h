@@ -8,12 +8,36 @@
 class tri : public hittable {
 
 public:
-    tri(const point3 &a, const point3 &b, const point3 &c, shared_ptr<material> mat) {
+    tri(const point3 &a, const point3 &b, const point3 &c,
+        shared_ptr<material> mat) {
+
         this->a = a;
         this->b = b;
         this->c = c;
         this->mat = mat;
-        bbox = aabb();
+
+        interval x(
+                   std::fmin(a.x(), std::fmin(b.x(), c.x())),
+                   std::fmax(a.x(), std::fmax(b.x(), c.x()))
+                  );
+
+        interval y(
+                   std::fmin(a.y(), std::fmin(b.y(), c.y())),
+                   std::fmax(a.y(), std::fmax(b.y(), c.y()))
+                  );
+
+        interval z(
+                   std::fmin(a.z(), std::fmin(b.z(), c.z())),
+                   std::fmax(a.z(), std::fmax(b.z(), c.z()))
+                  );
+
+        const double delta = 0.0001;
+
+        if (x.size() < delta) x = x.expand(delta);
+        if (y.size() < delta) y = y.expand(delta);
+        if (z.size() < delta) z = z.expand(delta);
+
+        bbox = aabb(x, y, z);
     }
 
     virtual bool hit(const ray &r, interval ray_t, hit_record &rec) const override {
