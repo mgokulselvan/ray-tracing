@@ -1,0 +1,89 @@
+{
+  "asset": {
+    "version": "2.0",
+    "generator": "Simple ray tracer test"
+  },
+  "scene": 0,
+  "scenes": [
+    {
+      "nodes": [0, 1]
+    }
+  ],
+  "nodes": [
+    {
+      "name": "TriangleNode",
+      "mesh": 0
+    },
+    {
+      "name": "CameraNode",
+      "camera": 0,
+      "translation": [0.5, 0.5, 3.0]
+    }
+  ],
+  "cameras": [
+    {
+      "name": "TestCamera",
+      "type": "perspective",
+      "perspective": {
+        "aspectRatio": 1.0,
+        "yfov": 0.7,
+        "znear": 0.01,
+        "zfar": 100.0
+      }
+    }
+  ],
+  "meshes": [
+    {
+      "name": "TestTriangle",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 1
+          },
+          "indices": 0,
+          "mode": 4
+        }
+      ]
+    }
+  ],
+  "buffers": [
+    {
+      "uri": "data:application/octet-stream;base64,AAABAAIAAAAAAAAAAAAAAAAAAAAAAIA/AAAAAAAAAAAAAAAAAACAPwAAAAA=",
+      "byteLength": 44
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteOffset": 0,
+      "byteLength": 6,
+      "target": 34963
+    },
+    {
+      "buffer": 0,
+      "byteOffset": 8,
+      "byteLength": 36,
+      "target": 34962
+    }
+  ],
+  "accessors": [
+    {
+      "bufferView": 0,
+      "byteOffset": 0,
+      "componentType": 5123,
+      "count": 3,
+      "type": "SCALAR",
+      "min": [0],
+      "max": [2]
+    },
+    {
+      "bufferView": 1,
+      "byteOffset": 0,
+      "componentType": 5126,
+      "count": 3,
+      "type": "VEC3",
+      "min": [0, 0, 0],
+      "max": [1, 1, 0]
+    }
+  ]
+}

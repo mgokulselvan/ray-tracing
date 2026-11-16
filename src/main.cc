@@ -1,13 +1,20 @@
-#include "rtweekend.h"
-#include "bvh.h"
-#include "camera.h"
-#include "hittable.h"
-#include "hittable_list.h"
-#include "sphere.h"
-#include "material.h"
-#include "texture.h"
-#include "quad.h"
-#include "constant_medium.h"
+
+
+#include "core/rtweekend.h"
+// #include "external/tiny_gltf/tiny_gltf_v3.h"
+#include "optimize/bvh.h"
+#include "core/camera.h"
+#include "core/hittable.h"
+#include "core/hittable_list.h"
+#include "shape/sphere.h"
+#include "appearance/material.h"
+#include "appearance/texture.h"
+#include "shape/quad.h"
+#include "appearance/constant_medium.h"
+#include "shape/tri.h"
+#include "core/vec3.h"
+#include <memory>
+#include "reader/gltf2.h"
 
 //PPM - R G B as values form 0 to 255 , \n at the end of a line, a group of 3 numbers make one pixel
 void bouncing_spheres(){
@@ -414,17 +421,171 @@ void cornelle_smoke_multithreading() {
 	cam.render(world,4);
 }
 
-int main(){
-	switch(10) {
-		case 1: bouncing_spheres(); break;
-		case 2: checkered_spheres(); break;
-		case 3: earth(); break;
-		case 4: perlin_spheres(); break;
-		case 5: quads(); break;
-		case 6: simple_light(); break;
-		case 7: cornell_box(); break;
-		case 8:cornelle_smoke(); break;
-		case 9: book2_final(800, 10000, 40); break;
-		case 10: cornelle_smoke_multithreading(); break;
-	}
+void traingle_test_one() {
+	hittable_list world;
+
+	auto red = make_shared<lambertian>(color(.65, .05, .05));
+	auto white = make_shared<lambertian>(color(.73, .73, .73));
+	auto green = make_shared<lambertian>(color(.12, .45, .15));
+	auto light = make_shared<diffuse_light>(color(7, 7, 7));
+
+	world.add(make_shared<quad>(point3(555,0,0), vec3(0,555,0), vec3(0,0,555),green ));
+	world.add(make_shared<quad>(point3(0,0,0), vec3(0,555,0), vec3(0,0,555),red ));
+	world.add(make_shared<quad>(point3(113,554,127), vec3(330,0,0), vec3(0,0,305),light ));
+	world.add(make_shared<quad>(point3(0,555,0), vec3(555,0,0), vec3(0,0,555),white ));
+	world.add(make_shared<quad>(point3(0,0,0), vec3(555,0,0), vec3(0,0,555),white ));
+	world.add(make_shared<quad>(point3(0,0,555), vec3(555,0,0), vec3(0,555,0),white ));
+
+        // Pyramid vertices
+        point3 A(180, 0, 180);
+        point3 B(380, 0, 180);
+        point3 C(380, 0, 380);
+        point3 D(180, 0, 380);
+
+        point3 Apex(280, 200, 280);
+
+        // Base (2 triangles)
+        world.add(make_shared<tri>(A, B, C, red));
+        world.add(make_shared<tri>(A, C, D, red));
+
+        world.add(make_shared<tri>(A, B, Apex, red));
+        world.add(make_shared<tri>(B, C, Apex, green));
+        world.add(make_shared<tri>(C, D, Apex, white));
+        world.add(make_shared<tri>(D, A, Apex, red));
+
+	camera cam;
+
+	cam.aspect_ratio = 1.0;
+	cam.image_width = 600;
+	cam.samples_per_pixel = 10;
+	cam.max_depth = 50;
+
+	cam.vfov = 40;
+	cam.lookfrom = point3(278,278,-800);
+	cam.lookat = point3(278,278,0);
+	cam.vup = vec3(0,1,0);
+	cam.background = color(0,0,0);
+
+	cam.defocus_angle = 0;
+
+	cam.render(world,4);
+}
+
+void gltf2_test() {
+	hittable_list world;
+
+        auto red = make_shared<diffuse_light>(color(5, 0, 0));
+
+        tg3_model* model = gltf2_open("./gltf2s/testone.gltf");
+
+        gltf2_import_into_world(
+                                model,
+                                &world
+                               );
+
+	camera cam;
+
+	cam.aspect_ratio = 1.0;
+	cam.image_width = 600;
+	cam.samples_per_pixel = 10;
+	cam.max_depth = 50;
+	cam.background = color(0,0,0);
+	cam.defocus_angle = 0;
+
+        gltf2_import_camera(*model, &cam);
+
+        gltf2_close(model);
+
+	cam.render(world,4);
+}
+
+void gltf2_test_two() {
+	hittable_list world;
+
+        auto red = make_shared<diffuse_light>(color(5, 0, 0));
+
+        tg3_model* model = gltf2_open("./gltf2s/CesiumMilkTruck.glb");
+
+        gltf2_import_into_world(
+                                model,
+                                &world
+                               );
+
+	camera cam;
+
+	cam.aspect_ratio = 1.0;
+	cam.image_width = 600;
+	cam.samples_per_pixel = 100;
+	cam.max_depth = 50;
+	cam.background = color(0,0,0);
+	cam.defocus_angle = 0;
+
+	cam.vfov = 40;
+	cam.lookfrom = point3(8,7,5);
+	cam.lookat = point3(0,0,0);
+	cam.vup = vec3(0,1,0);
+	cam.background = color(0,0,0);
+
+        gltf2_import_camera(*model, &cam);
+
+        add_light_behind_cam(&world, cam);
+
+        gltf2_close(model);
+
+	cam.render(world,4);
+}
+
+void gltf2_test_three() {
+	hittable_list world;
+
+        tg3_model* model = gltf2_open("./gltf2s/dining-room-light-ver_camera_with.glb");
+
+        gltf2_import_into_world(
+                                model,
+                                &world
+                               );
+
+	camera cam;
+
+	cam.aspect_ratio = 1.0;
+	cam.image_width = 600;
+	cam.samples_per_pixel = 100;
+	cam.max_depth = 50;
+	cam.background = color(0,0,0);
+	cam.defocus_angle = 0;
+
+	cam.vfov = 40;
+	cam.lookfrom = point3(8,7,5);
+	cam.lookat = point3(0,0,0);
+	cam.vup = vec3(0,1,0);
+	cam.background = color(0,0,0);
+
+        gltf2_import_camera(*model, &cam);
+
+        // add_light_behind_cam(&world, cam);
+
+        gltf2_close(model);
+
+	cam.render(world,8);
+}
+
+int main(int argc, char* argv[]){
+    int choice = 11;
+    if (argc > 1) choice = std::stoi(argv[1]);
+    switch(choice) {
+    case 1: bouncing_spheres(); break;
+    case 2: checkered_spheres(); break;
+    case 3: earth(); break;
+    case 4: perlin_spheres(); break;
+    case 5: quads(); break;
+    case 6: simple_light(); break;
+    case 7: cornell_box(); break;
+    case 8:cornelle_smoke(); break;
+    case 9: book2_final(800, 10000, 40); break;
+    case 10: cornelle_smoke_multithreading(); break;
+    case 11: traingle_test_one(); break;
+    case 12: gltf2_test(); break;
+    case 13: gltf2_test_two(); break;
+    case 14: gltf2_test_three(); break;
+    }
 }

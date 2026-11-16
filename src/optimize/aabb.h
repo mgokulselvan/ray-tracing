@@ -4,8 +4,8 @@
 #ifndef AABB_H
 #define AABB_H
 
-#include "interval.h"
-#include "vec3.h"
+#include "../core/interval.h"
+#include "../core/vec3.h"
 
 class aabb {
 	public:

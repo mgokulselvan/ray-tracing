@@ -2,8 +2,8 @@
 #define SPHERE_H
 
 
-#include "hittable.h"
-#include "vec3.h"
+#include "../core/hittable.h"
+#include "../core/vec3.h"
 
 
 class sphere : public hittable {//this sphere is hittable i.e. ray can intersect it,which is required if we have to render it on our image

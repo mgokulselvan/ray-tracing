@@ -2,7 +2,8 @@
 #define CAMERA_H
 
 #include "hittable.h"
-#include "material.h"
+#include "../appearance/material.h"
+#include "hittable_list.h"
 #include <thread>
 #include <vector>
 #include <functional>
@@ -235,8 +236,8 @@ class camera {
 				return color_from_emission;//base class of material has false as default return for this "scatter" function and light materials dont have a scatter function, so they return false by default
 
 			//if the ray hit some other surface, then this ray color is attenuation i.e. how much light it reflects in each color * ray color of ray of light from the surface that is coming to this spot from other place, (that is why we send a ray in that directoin getting to know the color of ray coming from that source, or surface, or whatever it is that the ray is coming from)
-			color color_from_scatter = attenuation * ray_color(scattered, depth-1, world);
-			return color_from_emission + color_from_scatter;//default return for "emitted" function is 0,0,0 i.e. black,and non light source materials dont have a emitted function call overridden, hence they return the default i.e. black, so color_from_scatter + color_from_emission for surfaces that arent light sources is just equal to color_from_scatter unless the material has both of them overridden
+			// color color_from_scatter = attenuation * ray_color(scattered, depth-1, world);
+			// return color_from_emission + color_from_scatter;//default return for "emitted" function is 0,0,0 i.e. black,and non light source materials dont have a emitted function call overridden, hence they return the default i.e. black, so color_from_scatter + color_from_emission for surfaces that arent light sources is just equal to color_from_scatter unless the material has both of them overridden
 			/*
 			//vec3 direction = random_on_hemisphere(rec.normal);
 			vec3 direction = rec.normal + random_unit_vector();//this ensure lambertian spheres distribution which is close to how "diffuse" materials usually scatter light, rather than uniformly in any direction , its more likely , in direction near to the normal of the point of intersection
@@ -250,5 +251,26 @@ class camera {
 			return (1.0-a)*color(1.0,1.0,1.0) + a*color(0.5,0.7,1.0);
 		}
 };
+
+
+#include "../shape/tri.h"
+inline void add_light_behind_cam(hittable_list *world, camera cam) {
+
+    vec3 forward = unit_vector(cam.lookat - cam.lookfrom);
+    vec3 right = unit_vector(cross(forward, cam.vup));
+    vec3 up = unit_vector(cross(right, forward));
+
+    point3 center = cam.lookfrom - 2.0 * forward;
+
+    double size = 5.0;
+
+    point3 a = center - size * right - size * up;
+    point3 b = center + size * right - size * up;
+    point3 c = center + size * up;
+
+    auto light = make_shared<diffuse_light>(color(30, 30, 30));
+
+    world->add(make_shared<tri>(a, b, c, light));
+}
 
 #endif

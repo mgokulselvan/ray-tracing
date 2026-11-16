@@ -33,7 +33,7 @@ inline double random_int(double min, double max){//random integer in the interva
 }
 
 //common headers
-#include "color.h"
+#include "../appearance/color.h"
 #include "ray.h"
 #include "vec3.h"
 #include "interval.h"

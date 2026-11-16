@@ -1,7 +1,7 @@
 #ifndef MATERIAL_H
 #define MATERIAL_H
 
-#include "hittable.h"
+#include "../core/hittable.h"
 #include "texture.h"
 //the material class needs the time only because it creates a ray and sends it back to the one which called it, not really send it back , but its reference and it puts it to that and the calling function uses it and bla bla bla, so you know what im saying, the scatter logic doesnt depend on time, because, the scatter function only gets what ray hits it, angle and stuff
 

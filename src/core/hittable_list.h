@@ -1,7 +1,7 @@
 #ifndef HITTABLE_LIST_H
 #define HITTABLE_LIST_H
 
-#include "aabb.h"
+#include "../optimize/aabb.h"
 #include "hittable.h"
 #include <vector>
 

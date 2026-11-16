@@ -1,7 +1,7 @@
 #ifndef TEXTURE_H
 #define TEXTURE_H
-#include "rtweekend.h"
-#include "rtw_stb_image.h"
+#include "../core/rtweekend.h"
+#include "../core/rtw_stb_image.h"
 #include "perlin.h"
 
 class texture {
