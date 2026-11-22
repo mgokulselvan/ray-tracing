@@ -225,24 +225,62 @@ class camera {
 			hit_record rec;
 
 			if(!world.hit(r, interval(0.001, infinity), rec))
-				return background;
-			//using 0.001 instead of 0 , because a random generated scattered ray might not start flush from the surface of sphere, and might be a bit below or above the sphere surface(this happens because of floating point rounding errors , so its not accurately flush), if its below, then it immediately hits the sphere again, to avoid this , we are giving some min value of t that the t has to be greater than, why we avoid this? , because it keeps hitting within the sphere, and then the outside of the sphere from where this supposed ray inside sphere was a scattering from , gets a dark color, a black spot, as it keeps hitting within the walls of the sphere, this is knows as shadow acne
+                            // using 0.001 instead of 0 , because a random generated
+                            // scattered ray might not start flush from the surface
+                            // of sphere, and might be a bit below or above the
+                            // sphere surface(this happens because of floating point
+                            // rounding errors , so its not accurately flush), if
+                            // its below, then it immediately hits the
+                            //  sphere again, to avoid this , we are giving some min
+                            //  value of t that the t has to be greater than,
+                            // why we avoid this? , because it keeps hitting within
+                            // the sphere, and then the outside of the sphere from
+                            // where this supposed ray inside sphere was a
+                            // scattering from , gets a dark color, a black spot,
+                            // as it keeps hitting within the walls of the sphere, this is knows as shadow acne
+                            return background;
 
 			ray scattered;
 			color attenuation;
 			color color_from_emission = rec.mat -> emitted(rec.u, rec.v, rec.p);
 
 			if(!rec.mat->scatter(r, rec, attenuation, scattered))
-				return color_from_emission;//base class of material has false as default return for this "scatter" function and light materials dont have a scatter function, so they return false by default
+                            // base class of material has false as default return
+                            // for this "scatter" function and light materials dont
+                            // have a scatter function,
+                            // so they return false by default
+                            return color_from_emission;
 
-			//if the ray hit some other surface, then this ray color is attenuation i.e. how much light it reflects in each color * ray color of ray of light from the surface that is coming to this spot from other place, (that is why we send a ray in that directoin getting to know the color of ray coming from that source, or surface, or whatever it is that the ray is coming from)
-			// color color_from_scatter = attenuation * ray_color(scattered, depth-1, world);
-			// return color_from_emission + color_from_scatter;//default return for "emitted" function is 0,0,0 i.e. black,and non light source materials dont have a emitted function call overridden, hence they return the default i.e. black, so color_from_scatter + color_from_emission for surfaces that arent light sources is just equal to color_from_scatter unless the material has both of them overridden
-			/*
-			//vec3 direction = random_on_hemisphere(rec.normal);
-			vec3 direction = rec.normal + random_unit_vector();//this ensure lambertian spheres distribution which is close to how "diffuse" materials usually scatter light, rather than uniformly in any direction , its more likely , in direction near to the normal of the point of intersection
-			return 0.5 * ray_color(ray(rec.p,direction), depth-1, world);//the 0.5 is for the color, a gray color, we are telling that gray absorbes only .5 of the light that hits it, (thats why its gray),(thats how physics work)
-			*/
+                        // if the ray hit some other surface, then this ray
+                        // color is attenuation i.e. how much light it reflects
+                        // in each color * ray color of ray of
+                        //  light from the surface that is coming to this spot
+                        //  from other place, (that is why we send a ray in that
+                        // directoin getting to know the color of ray coming
+                        // from that source, or surface, or whatever it is that the ray is coming from)
+			color color_from_scatter = attenuation * ray_color(scattered, depth-1, world);
+                        // default return for "emitted" function is 0,0,0 i.e.
+                        // black,and non light source materials dont have a
+                        // emitted function call overridden, hence they return
+                        // the default i.e. black, so color_from_scatter +
+                        // color_from_emission for surfaces that arent light
+                        // sources is just equal to color_from_scatter unless
+                        // the material has both of them overridden
+			return color_from_emission + color_from_scatter;
+
+
+                        // vec3 direction = random_on_hemisphere(rec.normal);
+
+                        // this ensure lambertian spheres distribution which is
+                        // close to how "diffuse" materials usually scatter
+                        // light, rather than uniformly in any direction ,
+                        // its more likely , in direction near to the normal of the point of intersection
+			// vec3 direction = rec.normal + random_unit_vector();
+                        // the 0.5 is for the color, a gray color, we are
+                        // telling that gray absorbes only
+                        //  .5 of the light that hits it, (thats why its gray),(thats how physics work)
+			// return 0.5 * ray_color(ray(rec.p,direction), depth-1, world);
+
 
 			//code never reaches here now//
 			//was used to send a gradient simulating sky whenever ray didnt hit anything
